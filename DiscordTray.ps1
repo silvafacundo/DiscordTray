@@ -57,12 +57,12 @@ $items = Get-ChildItem -Path $folder | Sort-Object CreationTime
 
 $lastDate = [Environment]::GetEnvironmentVariable("DiscordTrayLastDate", "User")
 
-if ($lastDate.GetType().Name -eq 'String') {
+if ($lastDate -and $lastDate.GetType().Name -eq 'String') {
 	$lastDate = Get-Date -Date "$($lastDate)"
 }
 
 # Check if lastDate is date object
-if (-not ($lastDate.GetType().Name -eq 'DateTime')) {
+if (-not $lastDate -or (-not ($lastDate.GetType().Name -eq 'DateTime'))) {
 	Log "Invalid date '$lastDate'"
 	$lastDate = Get-Date -Year 2020
 }

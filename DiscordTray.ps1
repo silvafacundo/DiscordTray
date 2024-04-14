@@ -1,6 +1,6 @@
 $userProfileFolder = $env:USERPROFILE
 
-$logFile = Join-Path -Path $env:TEMP -ChildPath "DiscordWatcher.log"
+$logFile = Join-Path -Path $env:TEMP -ChildPath "DiscordTray.log"
 
 $isCLI = $args[0] -eq "cli"
 
@@ -55,7 +55,7 @@ function Wait-Process($executablePath) {
 # Get all items inside the folder and sort by creation date
 $items = Get-ChildItem -Path $folder | Sort-Object CreationTime
 
-$lastDate = [Environment]::GetEnvironmentVariable("DiscordWatcherLastDate", "User")
+$lastDate = [Environment]::GetEnvironmentVariable("DiscordTrayLastDate", "User")
 
 if ($lastDate.GetType().Name -eq 'String') {
 	$lastDate = Get-Date -Date "$($lastDate)"
@@ -95,7 +95,7 @@ foreach ($file in $items) {
 	if (Wait-Process $discordPath) {
 		Log "New Discord Started..."
 		Update-Tray
-		[Environment]::SetEnvironmentVariable("DiscordWatcherLastDate", $file.CreationTime.ToString(), "User")
+		[Environment]::SetEnvironmentVariable("DiscordTrayLastDate", $file.CreationTime.ToString(), "User")
 		Log "Tray Updated."
 	}
 	else {

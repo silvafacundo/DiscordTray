@@ -15,3 +15,6 @@ $options = New-ScheduledJobOption -RunElevated -StartIfOnBattery -ContinueIfGoin
 Unregister-ScheduledJob -Name DiscordTray -ErrorAction SilentlyContinue
 
 Register-ScheduledJob -Name DiscordTray -FilePath $filePath -Trigger $trigger -ScheduledJobOption $options
+Clear-Host
+Write-Host "DiscordTray has been installed successfully!"
+

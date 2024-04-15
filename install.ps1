@@ -1,20 +1,35 @@
-$userProfileFolder = $env:USERPROFILE
+$currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+if (-not $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+	Write-Host "Please run this script as an administrator."
+	exit 1
+}
 
-$folderPath = Join-Path -Path $userProfileFolder -ChildPath "\AppData\Local\DiscordTray"
+try {
+	$userProfileFolder = $env:USERPROFILE
 
-New-Item -ItemType Directory -Path $folderPath -Force
+	$folderPath = Join-Path -Path $userProfileFolder -ChildPath "\AppData\Local\DiscordTray"
 
-$filePath = Join-Path -Path $folderPath -ChildPath "DiscordTray.ps1"
+	New-Item -ItemType Directory -Path $folderPath -Force
 
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/silvafacundo/DiscordTray/main/DiscordTray.ps1" -OutFile $filePath
+	$filePath = Join-Path -Path $folderPath -ChildPath "DiscordTray.ps1"
 
-$trigger = New-JobTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 1) -RepetitionDuration ([timespan]::MaxValue)
+	Invoke-WebRequest -Uri "https://raw.githubusercontent.com/silvafacundo/DiscordTray/main/DiscordTray.ps1" -OutFile $filePath
 
-$options = New-ScheduledJobOption -RunElevated -StartIfOnBattery -ContinueIfGoingOnBattery
+	$trigger = New-JobTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Minutes 1) -RepetitionDuration ([timespan]::MaxValue)
 
-Unregister-ScheduledJob -Name DiscordTray -ErrorAction SilentlyContinue
+	$options = New-ScheduledJobOption -RunElevated -StartIfOnBattery -ContinueIfGoingOnBattery
 
-Register-ScheduledJob -Name DiscordTray -FilePath $filePath -Trigger $trigger -ScheduledJobOption $options
-Clear-Host
-Write-Host "DiscordTray has been installed successfully!"
+	Unregister-ScheduledJob -Name DiscordTray -ErrorAction SilentlyContinue
+
+	Register-ScheduledJob -Name DiscordTray -FilePath $filePath -Trigger $trigger -ScheduledJobOption $options
+	Clear-Host
+	Write-Host "DiscordTray has been successfully installed!"
+}
+catch {
+	Clear-Host
+	Write-Host $_.Exception.Message
+	Write-Host " "
+	Write-Host " "
+	Write-Host "An error occurred while installing DiscordTray. Are you sure you are running this script in an elevated Windows PowerShell?"
+}
 
